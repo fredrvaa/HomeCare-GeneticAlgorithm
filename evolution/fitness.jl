@@ -1,12 +1,18 @@
-function fitness(routes, traveltimes)
+function individual_fitness(individual, traveltimes)
     traveltime = 0
-    for route in routes
-        prevpatient = 0 # Start with depot
-        for patient in route
-            traveltime += traveltimes[prevpatient + 1, patient + 1] # All intermediate travel times
-            prevpatient = patient
-        end
-        traveltime += traveltimes[prevpatient + 1, 1] # End with return back to depot
+    prevnode = 1 # Start with depot
+    for node in individual
+        traveltime += traveltimes[prevnode + 1, node + 1] # All intermediate travel times
+        prevnode = node
+    end
+    traveltime += traveltimes[prevnode + 1, 1] # End with return back to depot
+    return traveltime
+end
+
+function population_fitness(population, traveltimes)
+    traveltime = Vector{Float64}(undef, size(population, 1))
+    for (i, individual) in enumerate(eachrow(population))
+        traveltime[i] = individual_fitness(individual, traveltimes)
     end
     return traveltime
 end
