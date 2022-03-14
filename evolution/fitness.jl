@@ -6,13 +6,13 @@ function individual_fitness(individual, traveltimes)
         prevnode = node
     end
     traveltime += traveltimes[prevnode + 1, 1] # End with return back to depot
-    return traveltime
+    return 1 / traveltime
 end
 
 function population_fitness(population, traveltimes)
-    traveltime = Vector{Float64}(undef, size(population, 1))
+    fitness = Vector{Float64}(undef, size(population, 1))
     for (i, individual) in enumerate(eachrow(population))
-        traveltime[i] = individual_fitness(individual, traveltimes)
+        fitness[i] = individual_fitness(individual, traveltimes)
     end
-    return traveltime
+    return fitness
 end

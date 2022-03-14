@@ -1,15 +1,5 @@
 import JSON3
 
-include("evolution/fitness.jl")
-include("evolution/initialization.jl")
+include("evolution/genetic_algorithm.jl")
 
-json_string = read("train/train_0.json", String)
-instance = JSON3.read(json_string)
-
-patients = instance["patients"]
-traveltimes = mapreduce(permutedims, vcat, instance["travel_times"])
-routes = [range(1 + 20(x-1), 20(x)) for x in range(1,5)]
-
-f = fitness(routes, traveltimes)
-
-pop = initialize(10)
+genetic_algorithm("train/train_0.json", 1000, 500)
