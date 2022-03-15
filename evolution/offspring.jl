@@ -1,4 +1,5 @@
 using IterTools
+using Random
 
 function crossover!(population, probability=0.7)
     """
@@ -34,6 +35,9 @@ function crossover!(population, probability=0.7)
         end
         return circshift(offspring, point2)
     end
+
+    # Shuffle mating pool
+    population = population[shuffle(1:end), :]
 
     chromosome_length = length(population[1, :])
     for (parent1, parent2) in partition(eachrow(population), 2)
