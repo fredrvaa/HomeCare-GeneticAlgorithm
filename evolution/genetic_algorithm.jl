@@ -15,7 +15,6 @@ function genetic_algorithm(instance_path, population_size=100, n_generations=100
 
     # Initialize population
     population = initialize(population_size, instance["nbr_nurses"], length(instance["patients"]))
-
     # GA loop
     for n in 1:n_generations
         fitness = population_fitness(population, traveltimes)
@@ -24,7 +23,7 @@ function genetic_algorithm(instance_path, population_size=100, n_generations=100
         mutate!(population)
 
         append!(fitness_log, sum(fitness))
-        min_fitness = minimum(fitness)
-        println("Generation $n | fitness: $min_fitness")
+        max_fitness = maximum(fitness)
+        println("Generation $n | fitness: $max_fitness")
     end
 end
