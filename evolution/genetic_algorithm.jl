@@ -1,15 +1,10 @@
-using JSON3
-
 include("initialization.jl")
 include("fitness.jl")
 include("parent_selection.jl")
 include("survivor_selection.jl")
 include("offspring.jl")
 
-function genetic_algorithm(instance_path, population_size=100, n_generations=100)
-    # Read instance from path
-    json_string = read(instance_path, String)
-    instance = JSON3.read(json_string)
+function genetic_algorithm(instance, population_size=100, n_generations=100)
     traveltimes = mapreduce(permutedims, vcat, instance["travel_times"])
 
     fitness_log = []
@@ -26,8 +21,8 @@ function genetic_algorithm(instance_path, population_size=100, n_generations=100
 
         # Produce next generation
         ranking!(population, fitness, 0.01)
-        crossover!(population)
-        mutate!(population, 0.01)
+        crossover!(population, 0.9)
+        mutate!(population, 0.001)
     end
 
     return population
