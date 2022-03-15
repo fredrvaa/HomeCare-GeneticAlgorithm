@@ -1,4 +1,4 @@
-import JSON3
+using JSON3
 
 include("initialization.jl")
 include("fitness.jl")
@@ -27,5 +27,4 @@ function genetic_algorithm(instance_path, population_size=100, n_generations=100
         min_fitness = minimum(fitness)
         println("Generation $n | fitness: $min_fitness")
     end
-    print(population)
 end
