@@ -7,7 +7,7 @@ function initialize(population_size, n_nurses=25, n_patients=100)
     for i in 1:population_size
         individual = shuffle(patients)
         for n in 1:(n_nurses - 1)
-            insert!(individual, rand(1:(n_patients + n - 1)), 0)
+            insert!(individual, rand(1:(n_patients + n - 1)), -n)
         end
         population[i, :] = individual
     end
