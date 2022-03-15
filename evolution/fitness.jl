@@ -17,8 +17,7 @@ end
 function population_fitness(population, traveltimes)
     fitness = Vector{Float64}(undef, size(population, 1))
     for (i, individual) in enumerate(eachrow(population))
-        fitness[i] = traveltime(individual, traveltimes)
+        fitness[i] = -traveltime(individual, traveltimes)
     end
-    fitness = exp.(-(fitness .- mean(fitness)))
     return fitness
 end
