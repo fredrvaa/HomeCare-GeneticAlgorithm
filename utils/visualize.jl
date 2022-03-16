@@ -1,10 +1,10 @@
 using Plots
 
-function visualize_individual(individual, instance)
-    patients = instance["patients"]
-    coords = [[v["x_coord"], v["y_coord"]] for (k, v) in patients]
-    depot_x = instance["depot"]["x_coord"]
-    depot_y = instance["depot"]["y_coord"]
+function solution_plot(individual, instance)
+    patients = instance[:patients]
+    coords = [[v[:x_coord], v[:y_coord]] for (k, v) in patients]
+    depot_x = instance[:depot][:x_coord]
+    depot_y = instance[:depot][:y_coord]
 
     x = [depot_x]
     y = [depot_y]
@@ -29,5 +29,15 @@ function visualize_individual(individual, instance)
         append!(y, coords[node][2])
     end
     plot!(p, [depot_x], [depot_y], label="Depot", markershape=:square, markersize=5, seriestype=:scatter)
-    display(p)
+    return p
+end
+
+function fitness_plot(fitness_history)
+    return plot(1:length(fitness_history), fitness_history, title="Minimum fitness", label="Fittest individual", xlabel="Generation", ylabel="Fitness")
+end
+
+function visualize(individual, instance, fitness_history)
+    p1 = solution_plot(individual, instance)
+    p2 = fitness_plot(fitness_history)
+    display(plot(p1, p2, layout=(1,2), size=(1600,600)))
 end

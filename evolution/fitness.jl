@@ -16,11 +16,11 @@ function traveltime(individual, traveltimes)
     return traveltime
 end
 
-function population_fitness(population, traveltimes, capacity_nurse, patients, return_time)
+function population_fitness(population, instance)
     fitness = Vector{Float64}(undef, size(population, 1))
     for (i, individual) in enumerate(eachrow(population))
-        feasibility = isfeasible(individual, traveltimes, capacity_nurse, patients, return_time) ? 0 : 3000
-        fitness[i] = - (traveltime(individual, traveltimes) + feasibility)
+        penalty = isfeasible(individual, instance) ? 0 : 3000
+        fitness[i] = traveltime(individual, instance[:traveltimes]) + penalty
     end
     return fitness
 end

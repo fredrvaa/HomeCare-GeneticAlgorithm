@@ -3,21 +3,20 @@ include("fitness.jl")
 include("parent_selection.jl")
 include("survivor_selection.jl")
 include("offspring.jl")
+include("../utils/visualize.jl")
 
 function genetic_algorithm(instance, population_size=100, n_generations=100)
-    traveltimes = mapreduce(permutedims, vcat, instance["travel_times"])
-
-    fitness_log = []
+    fitness_history = []
 
     # Initialize population
-    population = initialize(population_size, instance["nbr_nurses"], traveltimes, instance["capacity_nurse"], instance["patients"], instance["depot"])
+    population = initialize(population_size, instance)
     # GA loop
     for n in 1:n_generations
         # Calculate and record fitness
-        fitness = population_fitness(population, traveltimes, instance["capacity_nurse"], instance["patients"], instance["depot"]["return_time"])
-        max_fitness = maximum(fitness)
-        println("Generation $n | fitness: $max_fitness")
-        append!(fitness_log, sum(fitness))
+        fitness = population_fitness(population, instance)
+        min_fitness = minimum(fitness)
+        println("Generation $n | fitness: $min_fitness")
+        append!(fitness_history, min_fitness)
 
         # Produce next generation
         ranking!(population, fitness, 0.01)
@@ -25,8 +24,7 @@ function genetic_algorithm(instance, population_size=100, n_generations=100)
         mutate!(population, 0.001)
         
         best_fit = population[argmax(fitness), :]
-        
-
+        visualize(best_fit, instance, fitness_history)
     end
 
     return population

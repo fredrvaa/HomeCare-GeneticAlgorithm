@@ -25,7 +25,7 @@ function ranking!(population, fitness, fraction_keep=0.1)
     n_keep = ceil(Int, population_size * fraction_keep)
     n_new = population_size - n_keep
 
-    ranks = sortperm(fitness, rev=true)
+    ranks = sortperm(fitness)
     # Store elites
     elites = population[ranks[1:n_keep], :]
 
