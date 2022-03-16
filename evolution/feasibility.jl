@@ -1,4 +1,4 @@
-function isfeasible(individual, instance)
+function isfeasible(individual, traveltimes, capacity_nurse, patients, return_time)
     """
     Checks if individual solution is feasible.
 
@@ -12,47 +12,91 @@ function isfeasible(individual, instance)
     - `individual::Vector{Int64}`: Individual to check feasibility for
     - `instance::Dict`: Instance dictionary containing constraints
     """
-    traveltimes = mapreduce(permutedims, vcat, instance["travel_times"])
-    capacity_nurse = instance["capacity_nurse"]
-    patients = instance["patients"]
-    return_time = instance["depot"]["return_time"]
-
     time = 0
     demand = 0
     feasible = true
-    prevnode = 1
-    for node in individual
+    prevnode = 0
+    for (i, node) in enumerate(individual)
+        #println("---- Node $i: $node -----")
+        #println("time $time, demand $demand")
         if node < 0
             if time > return_time # Constraint 4
-                println("return time")
+                #println("return time")
                 feasible = false
                 break
             end
             time = 0 
             demand = 0
-            prevnode = 1
+            prevnode = 0
             continue
         end
         patient = patients[node]
 
         demand += patient["demand"]
         if demand > capacity_nurse # Constraint 1
-            println("demand")
+            #println("demand")
             feasible = false
             break
         end
-
-        time += traveltimes[prevnode + 1, node + 1]
-        if time > (patient["end_time"] - patient["care_time"]) # Constraint 2
+        traveltime = traveltimes[prevnode + 1, node + 1] 
+        time += traveltime 
+        start_time, end_time, care_time = patient["start_time"], patient["end_time"], patient["care_time"]
+        #println("traveltime $traveltime, start_time $start_time, end_time $end_time, care_time $care_time")
+        if time > (end_time - care_time) # Constraint 2
             feasible = false
-            println("Time window")
+            #println("Time window $time $end_time $care_time")
             break
         end
 
-        if time < patient["start_time"] # Constraint 3
-            time = patient["start_time"]
+        if time < start_time # Constraint 3
+            time = start_time
         end
+
+        time += care_time
+
+        prevnode = node
     end
     
+    return feasible
+end
+
+function route_isfeasible(route, traveltimes, capacity_nurse, patients, return_time)
+    time = 0
+    demand = 0
+    feasible = true
+    prevnode = 0
+    for (i, node) in enumerate(route)
+        patient = patients[node]
+
+        demand += patient["demand"]
+        if demand > capacity_nurse # Constraint 1
+            #println("demand")
+            feasible = false
+            break
+        end
+        traveltime = traveltimes[prevnode + 1, node + 1] 
+        time += traveltime 
+        start_time, end_time, care_time = patient["start_time"], patient["end_time"], patient["care_time"]
+        #println("traveltime $traveltime, start_time $start_time, end_time $end_time, care_time $care_time")
+        if time > (end_time - care_time) # Constraint 2
+            feasible = false
+            #println("Time window $time $end_time $care_time")
+            break
+        end
+
+        if time < start_time # Constraint 3
+            time = start_time
+        end
+
+        time += care_time
+
+        prevnode = node
+    end
+    
+    time += traveltimes[prevnode + 1, 1]
+    if time > return_time
+        feasible = false
+        #println("return_time")
+    end
     return feasible
 end
