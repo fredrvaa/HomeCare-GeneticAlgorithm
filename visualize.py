@@ -9,7 +9,7 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-with open('train/train_1.json', 'r') as file:
+with open('train/train_6.json', 'r') as file:
     data = json.load(file)
 
 patients = data['patients']
@@ -27,7 +27,10 @@ def nurse_list_to_coords(nurses: list, patients: dict) -> np.ndarray:
     return np.array(nurse_coords)
 
 nurse_coords = nurse_list_to_coords(nurses, patients)
+plt.figure(figsize=(4,4))
 for nurse in nurse_coords:
     plt.plot(nurse[:, 0], nurse[:, 1], marker='o')
 plt.scatter(depot['x_coord'], depot['y_coord'], color='black', marker='s', s=200)
+plt.xlim([0,100])
+plt.ylim([0,100])
 plt.show()
