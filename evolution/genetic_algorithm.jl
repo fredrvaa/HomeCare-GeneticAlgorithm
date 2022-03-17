@@ -5,13 +5,13 @@ include("survivor_selection.jl")
 include("offspring.jl")
 include("../utils/visualize.jl")
 
-function genetic_algorithm(instance, population_size=100, n_generations=100)
+function genetic_algorithm(instance, population_size=100, generations=100, elitism_frac=0.1, p_crossover=0.9, p_mutate=0.01)
     fitness_history = []
 
     # Initialize population
     population = initialize(population_size, instance)
     # GA loop
-    for n in 1:n_generations
+    for n in 1:generations
         # Calculate and record fitness
         fitness = population_fitness(population, instance)
         min_fitness = minimum(fitness)
@@ -19,9 +19,9 @@ function genetic_algorithm(instance, population_size=100, n_generations=100)
         append!(fitness_history, min_fitness)
 
         # Produce next generation
-        ranking!(population, fitness, 0.01)
-        crossover!(population, 0.9)
-        mutate!(population, 0.001)
+        ranking!(population, fitness, elitism_frac)
+        crossover!(population, p_crossover)
+        mutate!(population, p_mutate)
         
         best_fit = population[argmax(fitness), :]
         visualize(best_fit, instance, fitness_history)

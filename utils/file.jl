@@ -1,5 +1,4 @@
 using JSON3
-Base.convert(::Type{Symbol}, s::String) = Meta.parse(s)
 
 function get_instance(filepath)
     json_string = read("train/train_9.json", String)

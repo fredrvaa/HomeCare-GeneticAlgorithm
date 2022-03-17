@@ -31,7 +31,7 @@ function isfeasible(individual, instance)
         patient = instance[:patients][node]
 
         demand += patient[:demand]
-        if demand > capacity_nurse # Constraint 1
+        if demand > instance[:capacity_nurse] # Constraint 1
             feasible = false
             break
         end
@@ -63,7 +63,7 @@ function route_isfeasible(route, instance)
         patient = instance[:patients][node]
 
         demand += patient[:demand]
-        if demand > capacity_nurse # Constraint 1
+        if demand > instance[:capacity_nurse] # Constraint 1
             feasible = false
             break
         end
