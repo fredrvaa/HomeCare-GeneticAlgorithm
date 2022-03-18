@@ -37,16 +37,17 @@ function isfeasible(individual, instance)
         end
 
         time += instance[:traveltimes][prevnode + 1, node + 1]  
-        if time > (patient[:end_time] - patient[:care_time]) # Constraint 2
-            feasible = false
-            break
-        end
 
         if time < patient[:start_time] # Constraint 3
             time = patient[:start_time]
         end
 
         time += patient[:care_time]
+
+        if time > (patient[:end_time]) # Constraint 2
+            feasible = false
+            break
+        end
 
         prevnode = node
     end
@@ -69,17 +70,17 @@ function route_isfeasible(route, instance)
         end
 
         time += instance[:traveltimes][prevnode + 1, node + 1]  
-        #println("traveltime $traveltime, start_time $start_time, end_time $end_time, care_time $care_time")
-        if time > (patient[:end_time] - patient[:care_time]) # Constraint 2
-            feasible = false
-            break
-        end
-
+        
         if time < patient[:start_time] # Constraint 3
             time = patient[:start_time]
         end
 
         time += patient[:care_time]
+
+        if time > (patient[:end_time]) # Constraint 2
+            feasible = false
+            break
+        end
 
         prevnode = node
     end
