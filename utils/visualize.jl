@@ -1,8 +1,6 @@
 using Plots
 
 function solution_plot(individual, instance)
-    patients = instance[:patients]
-    coords = [[v[:x_coord], v[:y_coord]] for (k, v) in patients]
     depot_x = instance[:depot][:x_coord]
     depot_y = instance[:depot][:y_coord]
 
@@ -25,8 +23,8 @@ function solution_plot(individual, instance)
             n += 1
             continue
         end
-        append!(x, coords[node][1])
-        append!(y, coords[node][2])
+        append!(x, instance[:patients][node][:x_coord])
+        append!(y, instance[:patients][node][:y_coord])
     end
     plot!(p, [depot_x], [depot_y], label="Depot", markershape=:square, markersize=5, seriestype=:scatter)
     return p
