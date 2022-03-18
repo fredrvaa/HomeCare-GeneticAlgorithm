@@ -1,7 +1,7 @@
 using JSON3
 
 function get_instance(filepath)
-    json_string = read("train/train_9.json", String)
+    json_string = read(filepath, String)
     instance = copy(JSON3.read(json_string))
     instance[:traveltimes] = mapreduce(permutedims, vcat, instance[:travel_times]) # Convert to array from vector[vector]
     delete!(instance, :travel_times)
