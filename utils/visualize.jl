@@ -14,9 +14,9 @@ function solution_plot(individual, instance)
             append!(y, depot_y)
             unused_nurse = length(y) == 2
             if unused_nurse
-                plot!(p, x, y, label="Nurse $n (unused)", markershape=:circle, markercolor=:grey, linecolor=:grey)
+                plot!(p, x, y, label="Nurse $n (unused)", linewidth=2, markershape=:circle, markercolor=:grey, makersize=3, linecolor=:grey)
             else
-                plot!(p, x, y, label="Nurse $n", markershape=:circle)
+                plot!(p, x, y, label="Nurse $n", linewidth=2, markershape=:circle, makersize=3)
             end
             x = [depot_x]
             y = [depot_y]
