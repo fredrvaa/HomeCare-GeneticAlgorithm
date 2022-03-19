@@ -37,5 +37,5 @@ function ranking!(population, fitness, fraction_keep=0.1)
     population[(n_keep + 1):end, :] = population[idxs, :]  
     population[1:n_keep, :] = elites
 
-    return population
+    return copy(population)
 end

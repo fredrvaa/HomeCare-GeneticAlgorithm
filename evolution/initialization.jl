@@ -33,17 +33,13 @@ function semifeasible(instance)
     for n in 1:(instance[:nbr_nurses]-1)
         idxs = findall(unassigned)
         if (length(idxs) != 0)
-            if n == 1
-                node = 1
-            else
-                node = rand(idxs)
-            end
+            node = rand(idxs)
             unassigned[node] = 0
             individual[i] = node
             i += 1
             demand = instance[:patients][node][:demand]
             for neighbour in closest[node, :]
-                if !unassigned[neighbour]
+                if !unassigned[neighbour] || rand() < 0.01
                     continue
                 end
 
@@ -69,7 +65,7 @@ function sort_by_endtime!(individual, instance)
     i = 1
     for node in individual
         if node < 0
-            route = sort(route, by=x -> instance[:patients][x][:end_time])
+            route = sort(route, by=x -> instance[:patients][x][:start_time])
             route_length = length(route)
             individual[i:(i+route_length-1)] = route
             i += (route_length + 1)
@@ -81,7 +77,7 @@ function sort_by_endtime!(individual, instance)
     return individual
 end
 
-function remove_infeasible!(individual, instance)
+function get_infeasible(individual, instance)
     idxs = []
     time = 0
     prevnode = 0
@@ -107,9 +103,7 @@ function remove_infeasible!(individual, instance)
         time = new_time
         prevnode = node
     end
-    infeasible = individual[idxs]
-    deleteat!(individual, idxs)
-    return infeasible
+    return idxs
 end
 
 function place_infeasible!(node, individual, instance)
@@ -133,7 +127,7 @@ function place_infeasible!(node, individual, instance)
 
             start_idx = idx
 
-            while idx <= length(individual) && individual[idx] > 0 # Move idx to end of route
+            while idx < length(individual) && individual[idx] > 0 # Move idx to end of route
                 idx += 1
             end
 
@@ -167,7 +161,11 @@ function place_infeasible!(node, individual, instance)
             end
             idx -= 1
         end
-        insert!(individual, idx, node)
+        if idx >= length(individual)
+            append!(individual, node)
+        else 
+            insert!(individual, idx, node)
+        end
         placed = true
     end
     return placed
@@ -175,8 +173,9 @@ end
 
 function make_feasible!(individual, instance)
     sort_by_endtime!(individual, instance)
-    infeasible = remove_infeasible!(individual, instance)
-    #println("inf $infeasible")
+    infeasible_idxs = get_infeasible(individual, instance)
+    infeasible = individual[infeasible_idxs]
+    deleteat!(individual, infeasible_idxs)
     for node in infeasible
         place_infeasible!(node, individual, instance)
     end
