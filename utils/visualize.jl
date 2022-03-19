@@ -31,7 +31,12 @@ function solution_plot(individual, instance)
 end
 
 function fitness_plot(fitness_history)
-    return plot(1:length(fitness_history), fitness_history, title="Minimum fitness", label="Fittest individual", xlabel="Generation", ylabel="Fitness")
+    p = plot(title="Fitness", xlabel="Generation", ylabel="Fitness")
+    x = 1:size(fitness_history, 1)
+    plot!(p, x, fitness_history[:, 1], label="Min")
+    #plot!(p, x, fitness_history[:, 2], label="Max")
+    plot!(p, x, fitness_history[:, 3], label="Mean")
+    return p
 end
 
 function visualize(individual, instance, fitness_history)
