@@ -60,7 +60,7 @@ function route_isfeasible(route, instance)
     demand = 0
     feasible = true
     prevnode = 0
-    for (i, node) in enumerate(route)
+    for node in route
         patient = instance[:patients][node]
 
         demand += patient[:demand]
