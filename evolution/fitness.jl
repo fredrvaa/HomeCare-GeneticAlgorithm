@@ -21,7 +21,7 @@ function feasibility_penalty(individual, instance)
     n = length(get_infeasible(individual, instance))
     penalty = n*100
     if n > 0
-        penalty += 500
+        penalty += 200
     end
     return penalty
 end
@@ -31,7 +31,6 @@ function penalty(individual, instance)
 end
 
 function individual_fitness(individual, instance, penalty_factor=0.9)
-    println(feasibility_penalty(individual, instance) * penalty_factor)
     return traveltime(individual, instance) + feasibility_penalty(individual, instance) * penalty_factor
 end
 
