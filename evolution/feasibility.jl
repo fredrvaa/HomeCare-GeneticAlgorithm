@@ -91,3 +91,7 @@ function route_isfeasible(route, instance)
     end
     return feasible
 end
+
+function population_feasiblity(population, instance)
+    return [isfeasible(individual, instance) for individual in eachrow(population)]
+end

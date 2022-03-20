@@ -14,7 +14,7 @@ include("../utils/visualize.jl")
 
 function step!(population, fitness, instance, n_elites, p_crossover, p_mutate)
     ranks = sortperm(fitness)
-
+    prefeasible = population[findall(population_feasiblity(population[ranks,:], instance)), :]
     # Elitism
     elites = population[ranks[1:n_elites], :]
 
@@ -37,6 +37,11 @@ function step!(population, fitness, instance, n_elites, p_crossover, p_mutate)
     fitness = population_fitness(population, instance)
     worst = sortperm(fitness, rev=true)
     population[worst[1:n_elites], :] = elites
+
+    n_postfeasible = length(findall(population_feasiblity(population, instance)))
+    if n_postfeasible < 1
+        population[worst[n_elites+1], :] = prefeasible[1, :]
+    end
 end
 
 function genetic_algorithm(instance, visualize_run=true, population_size=100, generations=100, elitism_frac=0.05, p_crossover=0.9, p_mutate=0.01, crowding_factor=1, mutation_decay=0.001, islands=3, migration_frac=0.01, migration_interval=25)
@@ -100,5 +105,17 @@ function genetic_algorithm(instance, visualize_run=true, population_size=100, ge
         set_description(iter, "Generation $n | $fitness_text | $instance_text")
     end
 
-    return best_fit
+    solution = nothing
+    solution_fitness = Inf
+    for i in 1:islands
+        population = populations[i,:,:]
+        feasible = population[findall(population_feasiblity(population, instance)),:] 
+        fitness = population_fitness(feasible, instance)
+        if minimum(fitness) < solution_fitness
+            solution = population[argmin(fitness), :]
+            solution_fitness = minimum(fitness)
+        end
+    end
+
+    return solution
 end
