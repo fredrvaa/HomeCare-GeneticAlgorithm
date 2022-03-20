@@ -116,10 +116,10 @@ function reroute!(individual, instance)
 end
 
 function dropout!(individual, instance)
-    f1 = individual_fitness(individual, instance)
     removed_nodes = []
     copied_individual = copy(individual)
-    for i in 1:1:length(copied_individual)
+    l = rand(1:(length(individual) / 2))
+    while length(removed_nodes) < l
         idx = rand(1:length(copied_individual))
 
         if copied_individual[idx] < 0 # Force to not select separation node

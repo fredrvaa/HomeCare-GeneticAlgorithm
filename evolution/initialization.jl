@@ -100,17 +100,15 @@ function get_infeasible(individual, instance)
 end
 
 function place_infeasible!(node, individual, instance)
-    closest = instance[:closest][node, :]
-    closest[1:5] = shuffle(closest[1:5])
+    closest = shuffle(instance[:closest][node, 1:5])
     placed = false
     for neighbour in closest
         if placed
             break
         end
 
-        idxs = findall(x -> x==neighbour, individual)
-        if length(idxs) > 0
-            idx = idxs[1]
+        idx = findfirst(x -> x==neighbour, individual)
+        if idx !== nothing
             while idx > 1 && individual[idx] > 0 # Move idx to start of route
                 idx -= 1
             end
