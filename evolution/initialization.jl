@@ -15,18 +15,9 @@ function initialize(population_size, instance)
     return population
 end
 
-function traveltime_nodes(node1, node2, instance)
-    return instance[:traveltimes][node1 + 1, node2 + 1]
-end
-
-function closest_neighbours(node, instance)
-    neighbours = sort(1:length(instance[:patients]), by=x -> traveltime_nodes(node, x, instance))
-    return neighbours[2:end]
-end
 
 function semifeasible(instance)
     individual = Vector{Int}(undef, (length(instance[:patients]) + instance[:nbr_nurses] - 1))
-    closest = mapreduce(permutedims, vcat, map(p -> closest_neighbours(p, instance), 1:length(instance[:patients])))
 
     unassigned = trues(length(instance[:patients]))
     i = 1
@@ -34,12 +25,14 @@ function semifeasible(instance)
         idxs = findall(unassigned)
         if (length(idxs) != 0)
             node = rand(idxs)
+            closest = instance[:closest][node, :]
+            closest[1:5] = shuffle(closest[1:5])
             unassigned[node] = 0
             individual[i] = node
             i += 1
             demand = instance[:patients][node][:demand]
-            for neighbour in closest[node, :]
-                if !unassigned[neighbour] || rand() < 0.01
+            for neighbour in closest
+                if !unassigned[neighbour]
                     continue
                 end
 
@@ -65,7 +58,7 @@ function sort_by_endtime!(individual, instance)
     i = 1
     for node in individual
         if node < 0
-            route = sort(route, by=x -> instance[:patients][x][:start_time])
+            route = sort(route, by=x -> instance[:patients][x][:end_time])
             route_length = length(route)
             individual[i:(i+route_length-1)] = route
             i += (route_length + 1)
@@ -107,7 +100,8 @@ function get_infeasible(individual, instance)
 end
 
 function place_infeasible!(node, individual, instance)
-    closest = closest_neighbours(node, instance)
+    closest = instance[:closest][node, :]
+    closest[1:5] = shuffle(closest[1:5])
     placed = false
     for neighbour in closest
         if placed
@@ -138,7 +132,7 @@ function place_infeasible!(node, individual, instance)
             end_idx = idx
 
             route = individual[start_idx:end_idx]
-            for insert_idx in start_idx:end_idx
+            for insert_idx in reverse(start_idx:end_idx)
                 insert!(route, (insert_idx - start_idx + 1), node)
                 if route_isfeasible(route, instance)
                     insert!(individual, insert_idx, node)
@@ -163,6 +157,8 @@ function place_infeasible!(node, individual, instance)
         end
         if idx >= length(individual)
             append!(individual, node)
+        elseif idx <= 0
+            pushfirst!(individual, node)
         else 
             insert!(individual, idx, node)
         end
