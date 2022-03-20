@@ -12,49 +12,61 @@ include("mutation.jl")
 include("feasibility.jl")
 include("../utils/visualize.jl")
 
-function step!(population, fitness, instance, n_elites, p_crossover, p_mutate)
+struct PopulationParams
+    p_crossover::Float64
+    p_mutate::Float64
+    mutation_decay::Float64
+    n_elites::Int
+end
+
+function step!(population, fitness, instance, params)
     ranks = sortperm(fitness)
-    prefeasible = population[findall(population_feasiblity(population[ranks,:], instance)), :]
+    prefeasible = population[findall(population_feasiblity(population, instance)), :]
     # Elitism
-    elites = population[ranks[1:n_elites], :]
+    elites = population[ranks[1:params.n_elites], :]
 
     # Parent selection
     ranking!(population, ranks)
 
     # Shuffle mating pool and crossover
     population[:] = population[shuffle(1:end), :]
+    #parents = copy(population)
 
     # Crossover and mutate to create offspring
-    crossover!(population, p_crossover)
+    crossover!(population, params.p_crossover)
 
-    mutate!(population, instance, p_mutate)
+    mutate!(population, instance, params.p_mutate)
 
-    #population = mutated
     # Survivor selection
     #crowding!(parents, population, instance, 1)#(1-n/generations))
 
     # Propagate elites
     fitness = population_fitness(population, instance)
     worst = sortperm(fitness, rev=true)
-    population[worst[1:n_elites], :] = elites
+    population[worst[1:params.n_elites], :] = elites
 
+    # Make sure feasible are kept
     n_postfeasible = length(findall(population_feasiblity(population, instance)))
     if n_postfeasible < 1
-        population[worst[n_elites+1], :] = prefeasible[1, :]
+        println("Infeasible")
+        population[worst[n_elites+1], :] = prefeasible[ranks[1], :]
     end
 end
 
 function genetic_algorithm(instance, visualize_run=true, population_size=100, generations=100, elitism_frac=0.05, p_crossover=0.9, p_mutate=0.01, crowding_factor=1, mutation_decay=0.001, islands=3, migration_frac=0.01, migration_interval=25)
     individual_size = (length(instance[:patients]) + instance[:nbr_nurses] - 1)
-    fitness_history = Array{Float64, 2}(undef, (generations, 3))
-    populations = Array{Int, 3}(undef, islands, population_size, individual_size)
-    # Initialize population
-    @threads for i in 1:islands
-        populations[i,:,:] = initialize(population_size, instance)
-    end
-
     n_elites = ceil(Int, population_size * elitism_frac)
     n_migrations = ceil(Int, population_size * migration_frac)
+
+    # Initialize islands of populations
+    populations = Array{Int, 3}(undef, islands, population_size, individual_size)
+    island_params = Vector{PopulationParams}(undef, islands)
+    @threads for i in 1:islands
+        populations[i,:,:] = initialize(population_size, instance)
+        island_params[i] = PopulationParams(rand(0.5:0.95), 1, 0, n_elites)
+    end
+
+    fitness_history = Array{Float64, 2}(undef, (generations, 3))
     best_fit = Vector{Int}(undef, individual_size)
     # GA loop
     iter = ProgressBar(1:generations)
@@ -74,7 +86,7 @@ function genetic_algorithm(instance, visualize_run=true, population_size=100, ge
                 fitness_history[n, 3] = mean(fitness)
                 best_fit = population[argmin(fitness), :]
             end
-            step!(population, fitness, instance, n_elites, p_crossover, p_mutate)
+            step!(population, fitness, instance, island_params[i])
         end
 
         if n % migration_interval == 0
@@ -85,7 +97,8 @@ function genetic_algorithm(instance, visualize_run=true, population_size=100, ge
                 worst = sortperm(island_fitness, rev=true)
                 n_migrated = 0
                 other_islands = populations[1:islands .!= i,:,:]
-                for other_island in eachslice(other_islands, dims=1)
+                for j in 1:islands-1
+                    other_island = other_islands[j, :, :]
                     other_fitness = population_fitness(other_island, instance)
                     best = sortperm(other_fitness)
                     island[worst[1+n_migrated:n_migrations+n_migrated],:,:] = other_island[best[1:n_migrations],:,:]
