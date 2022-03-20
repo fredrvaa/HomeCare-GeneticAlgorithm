@@ -2,6 +2,7 @@ using Statistics
 using Printf
 using ProgressBars
 using Base.Threads
+using Dates
 
 include("initialization.jl")
 include("fitness.jl")
@@ -11,6 +12,7 @@ include("crossover.jl")
 include("mutation.jl")
 include("feasibility.jl")
 include("../utils/visualize.jl")
+include("../utils/convert.jl")
 
 struct PopulationParams
     p_crossover::Float64
@@ -53,7 +55,10 @@ function step!(population, fitness, instance, params)
     end
 end
 
-function genetic_algorithm(instance, visualize_run=true, population_size=100, generations=100, elitism_frac=0.05, p_crossover=0.9, p_mutate=0.01, crowding_factor=1, mutation_decay=0.001, islands=3, migration_frac=0.01, migration_interval=25)
+function genetic_algorithm(instance, visualize_run=true, population_size=100, generations=100, elitism_frac=0.05, p_crossover=0.9, p_mutate=0.01, crowding_factor=1, mutation_decay=0.001, islands=3, migration_frac=0.01, migration_interval=25, checkpoint_interval=100)
+    datastring = Dates.format(Dates.now(), "yyyy-mm-ddTHH.MM.SS")
+    checkpoint_path = "checkpoints/$(instance[:instance_name])-$datastring.txt"
+    println(checkpoint_path)
     individual_size = (length(instance[:patients]) + instance[:nbr_nurses] - 1)
     n_elites = ceil(Int, population_size * elitism_frac)
     n_migrations = ceil(Int, population_size * migration_frac)
@@ -106,7 +111,26 @@ function genetic_algorithm(instance, visualize_run=true, population_size=100, ge
                 end
                 populations_copy[i,:,:] = island
             end
-            populations = populations_copy
+            populations[:] = populations_copy
+        end
+
+        if n % checkpoint_interval == 0
+            checkpoint_solution = nothing
+            solution_fitness = Inf
+            for i in 1:islands
+                population = populations[i,:,:]
+                feasible = population[findall(population_feasiblity(population, instance)),:] 
+                fitness = population_fitness(feasible, instance)
+                if minimum(fitness) < solution_fitness
+                    checkpoint_solution = population[argmin(fitness), :]
+                    solution_fitness = minimum(fitness)
+                end
+            end
+            open(checkpoint_path, "a") do io
+                println(io, "Generation $n")
+                print_list(io, tolist(checkpoint_solution))
+                println(io, "")
+            end
         end
 
         # Visualize and print stats for (previous) generation
