@@ -1,5 +1,6 @@
 using Statistics
 using Printf
+using ProgressBars
 using Base.Threads
 
 include("initialization.jl")
@@ -51,7 +52,8 @@ function genetic_algorithm(instance, visualize_run=true, population_size=100, ge
     n_migrations = ceil(Int, population_size * migration_frac)
     best_fit = Vector{Int}(undef, individual_size)
     # GA loop
-    for n in 1:generations
+    iter = ProgressBar(1:generations)
+    for n in iter
         fitness_history[n, 1] = Inf
         fitness_history[n, 2] = Inf
         fitness_history[n, 3] = Inf
@@ -95,7 +97,7 @@ function genetic_algorithm(instance, visualize_run=true, population_size=100, ge
         end
         fitness_text = @sprintf("Fitness %.2f", fitness_history[n, 1])
         instance_text = @sprintf("%s %.2f%% %.2f", instance[:instance_name], 100 * (1 - instance[:benchmark] / fitness_history[n, 1]), instance[:benchmark])
-        println("Generation $n | $fitness_text | $instance_text")
+        set_description(iter, "Generation $n | $fitness_text | $instance_text")
     end
 
     return best_fit
