@@ -54,17 +54,16 @@ function position(parent1, parent2)
     return offspring1, offspring2
 end
 
-function crossover!(population, probability)
-    for (parent1, parent2) in partition(eachrow(population), 2)
+function crossover!(population, probability=0.7)
+    for (i, (parent1, parent2)) in enumerate(partition(eachrow(population), 2))
         if rand() < probability
-            if rand() < 0.5
+            if rand() < 1
                 offspring1, offspring2 = order(parent1, parent2)
             else
                 offspring1, offspring2 = position(parent1, parent2)
             end
-            parent1 = offspring1
-            parent2 = offspring2
+            population[2i-1, :] = offspring1
+            population[2i, :] = offspring2
         end
     end
-    return population
 end

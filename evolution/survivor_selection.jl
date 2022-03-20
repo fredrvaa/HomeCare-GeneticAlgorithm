@@ -29,7 +29,7 @@ function crowding!(parents, offspring, instance, factor=1)
             o1 = competition(p1, o2, instance, factor)
             o2 = competition(p2, o1, instance, factor)
         end
-        offspring[2i-1, :] = o1
-        offspring[2i, :] = o2
+        offspring[2i-1, :] .= o1
+        offspring[2i, :] .= o2
     end
 end
