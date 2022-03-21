@@ -26,10 +26,6 @@ function feasibility_penalty(individual, instance)
     return penalty
 end
 
-function penalty(individual, instance)
-    return isfeasible(individual, instance) ? 0 : 2000
-end
-
 function individual_fitness(individual, instance, penalty_factor=0.9)
     return traveltime(individual, instance) + feasibility_penalty(individual, instance) * penalty_factor
 end
