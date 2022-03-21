@@ -25,4 +25,5 @@ Manifest.toml
 
 train
 benchmarks
+benchmarks_old
 checkpoints

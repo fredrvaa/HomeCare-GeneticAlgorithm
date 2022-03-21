@@ -10,7 +10,21 @@ include("utils/output.jl")
 for i in 0:9
     instance = get_instance("train/train_$i.json")
 
-    individual = genetic_algorithm(instance, false, 150, 3000, 0.05, 0.95, 0.98, 1, 0, 6, 0.01, 25)
+    datastring = Dates.format(Dates.now(), "yyyy-mm-ddTHH.MM.SS")
+    checkpoint_path = "checkpoints/$(instance[:instance_name])-$datastring.txt"
+
+    individual = genetic_algorithm( instance=instance, 
+                                    visualize_run=false,
+                                    population_size=100, 
+                                    n_generations=3000, 
+                                    elitism_frac=0.1, 
+                                    p_crossover_range=0.4:0.8,
+                                    p_mutate=0.98,
+                                    n_islands=6, 
+                                    migration_frac=0.01, 
+                                    migration_interval=25, 
+                                    checkpoint_interval=100,
+                                    checkpoint_path=checkpoint_path)
     fitness = individual_fitness(individual, instance)
 
     open("benchmarks/benchmark_$i.txt", "w") do io

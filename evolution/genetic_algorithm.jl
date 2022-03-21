@@ -61,24 +61,33 @@ function step!(population, fitness, instance, params)
     end
 end
 
-function genetic_algorithm(instance, visualize_run=true, population_size=100, n_generations=100, elitism_frac=0.05, p_crossover=0.9, p_mutate=0.01, crowding_factor=1, mutation_decay=0.001, n_islands=3, migration_frac=0.01, migration_interval=25, checkpoint_interval=100)
+function genetic_algorithm(;instance, 
+                            visualize_run=true,
+                            population_size=100, 
+                            n_generations=100, 
+                            elitism_frac=0.05, 
+                            p_crossover_range=0.4:0.8,
+                            p_mutate=0.98, 
+                            n_islands=6, 
+                            migration_frac=0.01, 
+                            migration_interval=25, 
+                            checkpoint_interval=100,
+                            checkpoint_path="checkpoints/default.txt")
     # Initialize constants
     datastring = Dates.format(Dates.now(), "yyyy-mm-ddTHH.MM.SS")
     checkpoint_path = "checkpoints/$(instance[:instance_name])-$datastring.txt"
-    individual_size = (length(instance[:patients]) + instance[:nbr_nurses] - 1)
+    individual_size = length(instance[:patients]) + instance[:nbr_nurses] - 1
     n_elites = ceil(Int, population_size * elitism_frac)
     n_migrations = ceil(Int, population_size * migration_frac)
 
     # Initialize islands of populations
     islands = Array{Int, 3}(undef, n_islands, population_size, individual_size)
     island_params = Vector{PopulationParams}(undef, n_islands)
-    crossover_start = 0.4
-    crossover_end = 0.95
-    crossover_step = (crossover_end - crossover_start)/n_islands
+    crossover_step = (p_crossover_range[end] - p_crossover_range[1])/n_islands
     @threads for i in 1:n_islands
         islands[i,:,:] = initialize(population_size, instance) 
-        p_crossover = crossover_start + crossover_step*(i-1)
-        island_params[i] = PopulationParams(p_crossover, 1, 0, n_elites)
+        p_crossover = p_crossover_range[1] + crossover_step*(i-1)
+        island_params[i] = PopulationParams(p_crossover, p_mutate, 0, n_elites)
     end
 
     fitness_history = Array{Float64, 2}(undef, (n_generations, 3))
