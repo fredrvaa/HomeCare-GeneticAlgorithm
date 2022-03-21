@@ -2,19 +2,6 @@ using IterTools
 using Random
 
 function order(parent1, parent2)
-    """
-    Order crossover
-    
-    Example:
-
-    5 patients, 3 nurses
-    ---------------------
-    1 2 -1 | 3 -2 4 | 5 (p1)
-    4 -2 2 | -1 1 3 | 5 (p2)
-    ========================
-    2 -1 1 | 3 -2 4 | 5 (o1)
-    2 -2 4 | -1 1 3 | 5 (o2)
-    """
     function create_offspring(parent1, parent2, point1, point2, chromosome_length)
         rightshift = chromosome_length - point2
         offspring = zeros(Int64, chromosome_length)
@@ -96,7 +83,7 @@ end
 function crossover!(population, probability=0.7)
     for (i, (parent1, parent2)) in enumerate(partition(eachrow(population), 2))
         if rand() < probability
-            if rand() < 0.5
+            if rand() < 0.9
                 offspring1, offspring2 = order(parent1, parent2)
             else
                 offspring1, offspring2 = edge_crossover(parent1, parent2)
