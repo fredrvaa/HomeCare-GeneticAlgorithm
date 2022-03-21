@@ -18,3 +18,16 @@ function get_instance(filepath)
     instance[:closest] = mapreduce(permutedims, vcat, map(p -> closest_neighbours(p, instance), 1:length(instance[:patients])))
     return instance    
 end
+
+function individual_from_file(filepath)
+    local individual
+    open(filepath, "r") do io
+        local line
+        for l in eachline(io)
+            line = l
+        end
+        line = replace(line, "[" => "", "]" => "" )
+        individual = map(node -> parse(Int, node), split(line, ","))
+    end
+    return individual
+end

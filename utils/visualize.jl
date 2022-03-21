@@ -42,5 +42,5 @@ end
 function visualize(individual, instance, fitness_history)
     p1 = solution_plot(individual, instance)
     p2 = fitness_plot(fitness_history)
-    display(plot(p1, p2, layout=(1,2), size=(1600,600), title=instance[:instance_name]))
+    display(plot(p1, p2, layout=(1,2), size=(1600,600)))
 end

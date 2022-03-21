@@ -37,3 +37,16 @@ function print_solution(io, individual, instance)
     println(io, "----------------------------------------")
     println(io, "Objective value (total duration): $total_time")
 end
+
+function print_list(io, individual)
+	print(io, "[")
+	for (i, elt) in enumerate(individual)
+			i > 1 && print(io, ", ")
+			if elt isa AbstractVector
+				print_list(io, elt)
+			else
+				print(io, elt)
+			end
+	end
+	print(io, "]")
+end

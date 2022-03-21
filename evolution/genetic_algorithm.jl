@@ -17,7 +17,6 @@ include("../utils/convert.jl")
 struct PopulationParams
     p_crossover::Float64
     p_mutate::Float64
-    mutation_decay::Float64
     n_elites::Int
 end
 
@@ -66,7 +65,7 @@ function genetic_algorithm(;instance,
                             population_size=100, 
                             n_generations=100, 
                             elitism_frac=0.05, 
-                            p_crossover_range=0.4:0.8,
+                            p_crossover_range=0.7:0.7,
                             p_mutate=0.98, 
                             n_islands=6, 
                             migration_frac=0.01, 
@@ -87,7 +86,7 @@ function genetic_algorithm(;instance,
     @threads for i in 1:n_islands
         islands[i,:,:] = initialize(population_size, instance) 
         p_crossover = p_crossover_range[1] + crossover_step*(i-1)
-        island_params[i] = PopulationParams(p_crossover, p_mutate, 0, n_elites)
+        island_params[i] = PopulationParams(p_crossover, p_mutate, n_elites)
     end
 
     fitness_history = Array{Float64, 2}(undef, (n_generations, 3))
@@ -144,6 +143,7 @@ function genetic_algorithm(;instance,
                 println(io, "Generation $n")
                 print_list(io, tolist(best_individual))
                 println(io, "")
+                println(io, best_individual)
             end
         end
 

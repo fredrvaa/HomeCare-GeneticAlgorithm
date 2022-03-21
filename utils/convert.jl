@@ -13,15 +13,15 @@ function tolist(individual)
     return output
 end
 
-function print_list(io, v::AbstractVector)
-	print(io, "[")
-	for (i, elt) in enumerate(v)
-			i > 1 && print(io, ", ")
-			if elt isa AbstractVector
-				print_list(io, elt)
-			else
-				print(io, elt)
-			end
-	end
-	print(io, "]")
+function toindividual(list)
+    individual = Vector{Int}()
+    for (i, route) in enumerate(list)
+        if i > 1
+            append!(individual, -i+1)
+        end
+        for node in route
+            append!(individual, node)
+        end
+    end
+    return individual
 end
