@@ -3,14 +3,7 @@ using Random
 
 include("fitness.jl")
 
-function roulette!(population, fitness, fraction_keep=0.01)
-    population_size = size(population, 1)
-    n_keep = ceil(Int, population_size * fraction_keep)
-    n_new = population_size - n_keep
-
-    # Store elites
-    elites = population[sortperm(fitness)[1:n_keep], :]
-
+function roulette!(population, fitness)
     total_fitness = sum(fitness)
     probabilities = map(x -> x / total_fitness, fitness)
     idxs = sample(axes(population, 1), Weights(probabilities), n_new) 

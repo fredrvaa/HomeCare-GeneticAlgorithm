@@ -57,64 +57,6 @@ function switch!(individual)
     individual[j] = temp1
 end
 
-function multiswitch!(individual)
-    for i in 1:length(individual)
-        if rand() < 0.05
-            j = sample(1:length(individual))
-            temp1 = individual[i]
-            temp2 = individual[j]
-            individual[i] = temp2
-            individual[j] = temp1
-        end
-    end
-    return individual
-end
-
-function reroute!(individual, instance)
-    f1 = individual_fitness(individual, instance)
-    removed_nodes = []
-    copied_individual = copy(individual)
-    for i in 1:rand(1:10)
-        idx = rand(1:length(copied_individual))
-
-        if copied_individual[idx] < 0 # Force to not select separation node
-            continue
-        end
-
-        while idx > 1 && copied_individual[idx] > 0 # Move idx to start of route
-            idx -= 1
-        end
-
-        if copied_individual[idx] < 0 # Move idx to first node on route if separation node
-            idx += 1
-        end
-
-        start_idx = idx
-
-        while idx < length(copied_individual) && copied_individual[idx] > 0 # Move idx to end of route
-            idx += 1
-        end
-
-        if copied_individual[idx] < 0 # Move idx to last node on route if separation node
-            idx -= 1
-        end
-
-        end_idx = idx
-
-        removed_nodes = vcat(removed_nodes, copied_individual[start_idx:end_idx])
-        deleteat!(copied_individual, start_idx:end_idx)
-    end
-    for node in shuffle(removed_nodes)
-        place_infeasible!(node, copied_individual, instance)
-    end
-    f2 = individual_fitness(individual, instance)
-    if f2 < f1
-        println("reroute $(f2 < f1)")
-    end
-    individual = copied_individual
-    return individual
-end
-
 function dropout!(individual, instance)
     removed_nodes = []
     copied_individual = copy(individual)
@@ -128,46 +70,32 @@ function dropout!(individual, instance)
         append!(removed_nodes, splice!(copied_individual, idx))
     end
     for node in shuffle(removed_nodes)
-        place_infeasible!(node, copied_individual, instance)
+        place_node!(node, copied_individual, instance, 10)
     end
     individual[:] = copied_individual
 end
 
-function reverse_route!(individual)
-    idx = rand(1:length(copied_individual))
-    while copied_individual[idx] < 0
-        idx = rand(1:length(copied_individual))
+function move_route!(individual, instance)
+    copied_individual = copy(individual)
+    route_idxs = random_route_idxs(copied_individual)
+    start_idx = route_idxs[1]
+    end_idx = route_idxs[end]
+
+    left = false
+    if start_idx == 1
+        end_idx += 1
+    elseif end_idx == length(copied_individual)
+        start_idx -= 1
     end
-
-    while idx > 1 && copied_individual[idx] > 0 # Move idx to start of route
-        idx -= 1
-    end
-
-    if copied_individual[idx] < 0 # Move idx to first node on route if separation node
-        idx += 1
-    end
-
-    start_idx = idx
-
-    while idx < length(copied_individual) && copied_individual[idx] > 0 # Move idx to end of route
-        idx += 1
-    end
-
-    if copied_individual[idx] < 0 # Move idx to last node on route if separation node
-        idx -= 1
-    end
-
-    end_idx = idx
-
-    copied_individual[start_idx:end_idx] = reverse(copied_individual[start_idx:end_idx])
-    return copied_individual
+    deleteat!(copied_individual, idx)
+    insert_idx = rand(findall(x -> x<0, copied_individual))
+    individual[:] = copied_individual
 end
 
 function mutate!(population, instance, probability=0.01)
     for (i, individual) in enumerate(eachrow(population))
         if rand() < probability
             choice = rand()
-            # mutated[i,:] = reverse_route!(individual)
             if choice < 0.20
                 swap_inside!(individual)
             elseif choice < 0.40

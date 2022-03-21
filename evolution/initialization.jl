@@ -100,7 +100,7 @@ function get_infeasible(individual, instance)
 end
 
 function place_infeasible!(node, individual, instance)
-    closest = shuffle(instance[:closest][node, 1:5])
+    closest = instance[:closest][node, :]
     placed = false
     for neighbour in closest
         if placed
